@@ -6,19 +6,22 @@ import { notFound } from './../middlewares/errorHandlerMiddleware.js';
 async function checkUser(user: string) {
     const api = `https://api.github.com/users/${user}/repos`;
 
-    const response : AxiosResponse = await axios.get(api);
-    if( response.data.message ){
-        throw notFound();
-    }
+    try{
+        const response : AxiosResponse = await axios.get(api);
 
-    const fighter = await fightersRepository.findFighter(user);
-    if( fighter.rowCount === 0 ){
-        await fightersRepository.insertFighter(user);
-    }
+        const fighter = await fightersRepository.findFighter(user);
+        if( fighter.rowCount === 0 ){
+            await fightersRepository.insertFighter(user);
+        }
         
-    const numberOfStars = countStars(response.data);
+        const numberOfStars = countStars(response.data);
 
-    return numberOfStars;
+        return numberOfStars;
+    } catch(error){
+        if(error){
+            throw notFound();
+        }
+    }
 }
 
 function countStars(dataArray : []) {
